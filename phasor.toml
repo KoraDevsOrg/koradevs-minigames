@@ -1,8 +1,9 @@
 [package]
 name = "koradevs-minigames"
-version = "0.2.0"
+version = "0.3.0"
 store = "https://raw.githubusercontent.com/KoraDevsOrg/phasorlang/main/lib"
 
 [dependencies]
+"core/memory.ph" = "store"
 "ui/base.ph" = "store"
 "ui/grid.ph" = "store"

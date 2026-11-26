@@ -1,3 +1,4 @@
+import "@store/core/memory.ph" -reutilizar
 import "@store/ui/base.ph" -reutilizar
 import "@store/ui/grid.ph" -reutilizar
 import "games/mini_sudoku.ph" -reutilizar
