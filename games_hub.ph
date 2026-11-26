@@ -90,7 +90,7 @@ draw_cell_num(gx, gy, col, row, cell, val, col_hex) = {
     if (val > 0.0) {
         tx = gx + (col * cell) + (cell * 0.40)
         ty = gy + (row * cell) + (cell * 0.34)
-        text(val, tx, ty, 20.0, col_hex)
+        text_num(val, tx, ty, 20.0, col_hex)
     } else { 0.0 }
     1.0
 }
@@ -102,12 +102,12 @@ render_top_hud(sw, px, py, clicked) = {
 
     draw_btn(8.0, 8.0, 72.0, 32.0, 0x21262D, 0x30363D, "MENU", 20.0, 18.0, 0x58A6FF)
     draw_btn(88.0, 8.0, 78.0, 32.0, 0x1F2937, 0x30363D, "NIVEL", 96.0, 18.0, 0xD29922)
-    text(difficulty, 144.0, 18.0, 10.0, 0xFFFFFF)
+    text_num(difficulty, 144.0, 18.0, 10.0, 0xFFFFFF)
 
     text("PTS:", sw - 122.0, 18.0, 9.5, 0x8B949E)
-    text(score, sw - 84.0, 18.0, 10.5, 0x3FB950)
+    text_num(score, sw - 84.0, 18.0, 10.5, 0x3FB950)
     text("R:", sw - 38.0, 18.0, 9.5, 0x8B949E)
-    text(streak, sw - 20.0, 18.0, 10.0, 0x79C0FF)
+    text_num(streak, sw - 20.0, 18.0, 10.0, 0x79C0FF)
 
     if (clicked == 1.0) {
         if (select_game(0.0, px, py, 8.0, 8.0, 72.0, 32.0) == 1.0) {
@@ -127,7 +127,7 @@ render_main_menu(sw, sh, px, py, clicked) = {
 
     text("KORADEVS JUEGOS", ox, 66.0, 14.0, 0xE6EDF3)
     text("RECORD:", ox, 88.0, 9.5, 0x8B949E)
-    text(best_score, ox + 62.0, 88.0, 10.0, 0xD29922)
+    text_num(best_score, ox + 62.0, 88.0, 10.0, 0xD29922)
 
     card_h = 56.0
     y1 = 112.0
@@ -210,7 +210,7 @@ render_active_game_stub(title_lbl, accent_col, sw, sh, px, py, clicked) = {
 
     text(title_lbl, gx, 64.0, 13.0, accent_col)
     text("DIFICULTAD x", gx, 86.0, 9.5, 0x8B949E)
-    text(difficulty, gx + 104.0, 86.0, 10.0, 0xFFFFFF)
+    text_num(difficulty, gx + 104.0, 86.0, 10.0, 0xFFFFFF)
 
     grid_draw(gx, gy, 4.0, 4.0, cell, 0x0D1117, 0x30363D, accent_col)
 
