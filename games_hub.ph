@@ -25,6 +25,7 @@ in_box(px, py, rx, ry, rw, rh) = {
 }
 
 add_points(base_pts, px, py, rx, ry, rw, rh) = {
+    res = 0.0
     if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
         streak = streak + 1.0
         gain = base_pts * difficulty
@@ -32,50 +33,64 @@ add_points(base_pts, px, py, rx, ry, rw, rh) = {
         if (score > best_score) {
             best_score = score
         } else { 1.0 }
+        res = 1.0
     } else { 1.0 }
-    1.0
+    res
 }
 
 select_game(target_id, px, py, rx, ry, rw, rh) = {
+    res = 0.0
     if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
         active_game = target_id
+        streak = 0.0
+        res = 1.0
     } else { 1.0 }
-    1.0
+    res
 }
 
 cycle_difficulty(px, py, rx, ry, rw, rh) = {
+    res = 0.0
     if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
         if (difficulty >= 3.0) {
             difficulty = 1.0
         } else {
             difficulty = difficulty + 1.0
         }
+        res = 1.0
     } else { 1.0 }
-    1.0
+    res
 }
 
 render_top_hud(sw, px, py, clicked) = {
+    handled = 0.0
     rect(0.0, 0.0, sw, 44.0, 0x161B22)
     line(0.0, 44.0, sw, 44.0, 0x30363D)
 
+    // Botón [MENU]
     rect(8.0, 8.0, 68.0, 28.0, 0x21262D)
     text("MENU", 18.0, 26.0, 10.0, 0x58A6FF)
-    if (clicked == 1.0) {
-        select_game(0.0, px, py, 8.0, 8.0, 68.0, 28.0)
-    } else { 1.0 }
 
+    // Botón [NIVEL]
     rect(84.0, 8.0, 74.0, 28.0, 0x1F2937)
     text("NIVEL", 92.0, 26.0, 9.5, 0xD29922)
     text(difficulty, 138.0, 26.0, 10.0, 0xFFFFFF)
-    if (clicked == 1.0) {
-        cycle_difficulty(px, py, 84.0, 8.0, 74.0, 28.0)
-    } else { 1.0 }
 
+    // Marcador PTS y R
     text("PTS:", sw - 120.0, 26.0, 9.5, 0x8B949E)
     text(score, sw - 82.0, 26.0, 10.5, 0x3FB950)
     text("R:", sw - 38.0, 26.0, 9.5, 0x8B949E)
     text(streak, sw - 20.0, 26.0, 10.0, 0x79C0FF)
-    1.0
+
+    if (clicked == 1.0) {
+        if (select_game(0.0, px, py, 8.0, 8.0, 68.0, 28.0) == 1.0) {
+            handled = 1.0
+        } else {
+            if (cycle_difficulty(px, py, 84.0, 8.0, 74.0, 28.0) == 1.0) {
+                handled = 1.0
+            } else { 1.0 }
+        }
+    } else { 1.0 }
+    handled
 }
 
 render_main_menu(sw, sh, px, py, clicked) = {
@@ -99,9 +114,15 @@ render_main_menu(sw, sh, px, py, clicked) = {
     text("3. QUEENS", 24.0, 262.0, 11.0, 0xFFFFFF)
 
     if (clicked == 1.0) {
-        select_game(1.0, px, py, 12.0, 108.0, w, 52.0)
-        select_game(2.0, px, py, 12.0, 170.0, w, 52.0)
-        select_game(3.0, px, py, 12.0, 232.0, w, 52.0)
+        if (select_game(1.0, px, py, 12.0, 108.0, w, 52.0) == 1.0) {
+            1.0
+        } else {
+            if (select_game(2.0, px, py, 12.0, 170.0, w, 52.0) == 1.0) {
+                1.0
+            } else {
+                select_game(3.0, px, py, 12.0, 232.0, w, 52.0)
+            }
+        }
     } else { 1.0 }
     1.0
 }
@@ -146,24 +167,33 @@ screen main {
     clicked = 0.0
     if (pd == 1.0) {
         if (last_click == 0.0) {
-            clicked = 1.0
+            if (px > 0.0) {
+                clicked = 1.0
+            } else { 1.0 }
         } else { 1.0 }
     } else { 1.0 }
     last_click = pd
 
     cls(0x090D13)
-    render_top_hud(sw, px, py, clicked)
+    hud_hit = render_top_hud(sw, px, py, clicked)
+
+    body_click = 0.0
+    if (clicked == 1.0) {
+        if (hud_hit == 0.0) {
+            body_click = 1.0
+        } else { 1.0 }
+    } else { 1.0 }
 
     if (active_game == 0.0) {
-        render_main_menu(sw, sh, px, py, clicked)
+        render_main_menu(sw, sh, px, py, body_click)
     } else {
         if (active_game == 1.0) {
-            render_active_game_stub("MINI SUDOKU", 0x3FB950, sw, sh, px, py, clicked)
+            render_active_game_stub("MINI SUDOKU", 0x3FB950, sw, sh, px, py, body_click)
         } else {
             if (active_game == 2.0) {
-                render_active_game_stub("TANGO", 0x58A6FF, sw, sh, px, py, clicked)
+                render_active_game_stub("TANGO", 0x58A6FF, sw, sh, px, py, body_click)
             } else {
-                render_active_game_stub("QUEENS", 0xD29922, sw, sh, px, py, clicked)
+                render_active_game_stub("QUEENS", 0xD29922, sw, sh, px, py, body_click)
             }
         }
     }
