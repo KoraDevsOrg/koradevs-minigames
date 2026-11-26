@@ -1342,8 +1342,8 @@
     copyCode: function() {
       try {
         var content = this.codeLines.join('\n');
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(content);
+        if (navigator.clipboard && (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })) {
+          (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })(content);
           this.terminalLogs.push('> [Chronos IDE] Código copiado al portapapeles con éxito.');
         } else {
           this.terminalLogs.push('> [Chronos IDE] Portapapeles no disponible en este entorno.');
@@ -1617,8 +1617,8 @@
         }
       } else if (action === 'import') {
         var importStmt = 'import "' + target.fullPath + '"';
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(importStmt);
+        if (navigator.clipboard && (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })) {
+          (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })(importStmt);
         }
         var hasImport = false;
         for (var li = 0; li < this.codeLines.length; li++) {
@@ -1631,8 +1631,8 @@
         this.showToast('📥 Copiado e Importado: ' + importStmt);
         this.terminalLogs.push('> [Layer Import] Capa agregada: ' + importStmt);
       } else if (action === 'copy_path') {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(target.fullPath);
+        if (navigator.clipboard && (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })) {
+          (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })(target.fullPath);
         }
         this.showToast('📋 Ruta copiada: ' + target.fullPath);
       } else if (action === 'new_file') {
@@ -3163,7 +3163,7 @@
             };
             rd.readAsText(file);
           };
-          inp.click();
+          console.log('[PhasorRuntime] Selector de archivo desactivado en modo app.');
         } else if (v === 102) {
           var inpDir = document.createElement('input');
           inpDir.type = 'file';
@@ -3202,7 +3202,7 @@
         } else if (v === 107) {
           console.log('Archivo eliminado del arbol activo.');
         } else if (v === 108) {
-          if (navigator.clipboard) navigator.clipboard.writeText('import "lib/screens/screen_explorer.ph"');
+          if (navigator.clipboard) (function(){ console.log('[PhasorRuntime] Portapapeles desactivado en modo app.'); })('import "lib/screens/screen_explorer.ph"');
           console.log('Directiva import copiada al portapapeles.');
         }
       }
