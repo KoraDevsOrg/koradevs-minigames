@@ -425,37 +425,39 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
                 } else { 0.0 }
             }
         } else {
-            if (hit_rect(px, py, s_gx, ny, 32.0, 26.0) == 1.0) {
-                if (s_level > 1.0) {
-                    s_level = s_level - 1.0
-                    sudoku_load_level(s_level, difficulty)
+            if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
+                if (sudoku_validate_all() == 1.0) {
+                    if (s_won == 0.0) {
+                        s_won = 1.0
+                        s_popup = 1.0
+                        pts_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
+                        s_last_score = pts_calc
+                        earned = pts_calc
+                    } else {
+                        s_popup = 1.0
+                    }
                 } else { 0.0 }
             } else {
-                if (hit_rect(px, py, s_gx + 132.0, ny, 32.0, 26.0) == 1.0) {
-                    s_level = s_level + 1.0
-                    sudoku_load_level(s_level, difficulty)
+                if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
+                    sudoku_reset_board()
                 } else {
-                    if (hit_rect(px, py, s_gx + 168.0, ny, 38.0, 26.0) == 1.0) {
-                        s_level = s_level + 5.0
-                        sudoku_load_level(s_level, difficulty)
+                    if (hit_rect(px, py, s_gx, ny, 32.0, 26.0) == 1.0) {
+                        if (s_level > 1.0) {
+                            s_level = s_level - 1.0
+                            sudoku_load_level(s_level, difficulty)
+                        } else { 0.0 }
                     } else {
-                        hit_i = grid_hit_index(px, py, s_gx, s_gy, 6.0, 6.0, s_cell)
-                        if (hit_i >= 0.0) {
-                            s_sel = hit_i
+                        if (hit_rect(px, py, s_gx + 132.0, ny, 32.0, 26.0) == 1.0) {
+                            s_level = s_level + 1.0
+                            sudoku_load_level(s_level, difficulty)
                         } else {
-                            if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
-                                if (sudoku_validate_all() == 1.0) {
-                                    if (s_won == 0.0) {
-                                        s_won = 1.0
-                                        s_popup = 1.0
-                                        pts_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
-                                        s_last_score = pts_calc
-                                        earned = pts_calc
-                                    } else { 0.0 }
-                                } else { 0.0 }
+                            if (hit_rect(px, py, s_gx + 168.0, ny, 38.0, 26.0) == 1.0) {
+                                s_level = s_level + 5.0
+                                sudoku_load_level(s_level, difficulty)
                             } else {
-                                if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
-                                    sudoku_reset_board()
+                                hit_i = grid_hit_index(px, py, s_gx, s_gy, 6.0, 6.0, s_cell)
+                                if (hit_i >= 0.0) {
+                                    s_sel = hit_i
                                 } else { 0.0 }
                             }
                         }
