@@ -1,5 +1,5 @@
 // ============================================================================
-// MINI SUDOKU 6x6 (CAJAS 2x3) — MEMORIA PLANA SoA + NIVELES Y NAVEGACION
+// MINI SUDOKU 6x6 (CAJAS 2x3) — MEMORIA PLANA SoA + POPUP DE VICTORIA Y SCORE
 // Arena: base 0.0 = tablero (36 celdas) | base 64.0 = pistas fijas (36 celdas)
 // ============================================================================
 signal s_init = 0.0
@@ -9,6 +9,9 @@ signal s_sel = 0.0
 signal s_sel_val = 0.0
 signal s_msg = 0.0
 signal s_won = 0.0
+signal s_popup = 0.0
+signal s_errors = 0.0
+signal s_last_score = 0.0
 signal s_tick = 0.0
 signal s_secs = 0.0
 signal s_gx = 12.0
@@ -16,9 +19,25 @@ signal s_gy = 108.0
 signal s_cell = 56.0
 signal s_bw = 336.0
 
-// Genera un tablero 6x6 (cajas 2x3) válido según el número de tablero (lvl) y dificultad (diff: 1..3)
+sudoku_calc_score(diff, secs, err_cnt) = {
+    base_pts = 100.0
+    if (diff == 2.0) { base_pts = 200.0 } else { 0.0 }
+    if (diff >= 3.0) { base_pts = 300.0 } else { 0.0 }
+
+    pen_time = secs
+    if (pen_time > (base_pts * 0.5)) {
+        pen_time = base_pts * 0.5
+    } else { 0.0 }
+
+    pen_err = err_cnt * 15.0
+    final_pts = base_pts - pen_time - pen_err
+    if (final_pts < 25.0) {
+        final_pts = 25.0
+    } else { 0.0 }
+    final_pts
+}
+
 sudoku_load_level(lvl, diff) = {
-    // Umbral de pistas: Nivel 1 = ~20 pistas, Nivel 2 = ~16 pistas, Nivel 3 = ~12 pistas
     clue_cut = 6.0
     if (diff == 2.0) { clue_cut = 5.0 } else { 0.0 }
     if (diff >= 3.0) { clue_cut = 4.0 } else { 0.0 }
@@ -57,6 +76,9 @@ sudoku_load_level(lvl, diff) = {
     s_sel_val = 0.0
     s_msg = 0.0
     s_won = 0.0
+    s_popup = 0.0
+    s_errors = 0.0
+    s_last_score = 0.0
     s_tick = 0.0
     s_secs = 0.0
     1.0
@@ -72,12 +94,14 @@ sudoku_reset_board() = {
     }
     s_msg = 0.0
     s_won = 0.0
+    s_popup = 0.0
+    s_errors = 0.0
+    s_last_score = 0.0
     s_tick = 0.0
     s_secs = 0.0
     1.0
 }
 
-// Valida las 6 filas, 6 columnas y 6 cajas 2x3 usando suma=21 y producto=720
 sudoku_validate_all() = {
     tot = 0.0
 
@@ -147,6 +171,7 @@ sudoku_validate_all() = {
         ok = 1.0
     } else {
         s_msg = 2.0
+        s_errors = s_errors + 1.0
     }
     ok
 }
@@ -263,6 +288,55 @@ sudoku_draw_keypad(px, py, clicked) = {
     1.0
 }
 
+// Dibuja el popup de ganador y gestiona sus botones [SIGUIENTE] y [CERRAR]
+sudoku_render_win_popup(sw, sh, px, py, clicked) = {
+    act = 0.0
+    if (s_popup == 1.0) {
+        pw = s_bw - 24.0
+        ph = 210.0
+        px0 = s_gx + 12.0
+        py0 = s_gy + 58.0
+
+        rect(px0, py0, pw, ph, 0x161B22)
+        line(px0, py0, px0 + pw, py0, 0x3FB950)
+        line(px0, py0 + ph, px0 + pw, py0 + ph, 0x3FB950)
+        line(px0, py0, px0, py0 + ph, 0x3FB950)
+        line(px0 + pw, py0, px0 + pw, py0 + ph, 0x3FB950)
+
+        text("GANASTE! SUDOKU RESUELTO", px0 + 16.0, py0 + 18.0, 12.5, 0x3FB950)
+
+        text("SCORE:", px0 + 18.0, py0 + 54.0, 11.0, 0x8B949E)
+        text_num(s_last_score, px0 + 95.0, py0 + 53.0, 14.0, 0xD29922)
+
+        text("TIEMPO (s):", px0 + 18.0, py0 + 86.0, 10.0, 0x8B949E)
+        text_num(s_secs, px0 + 125.0, py0 + 85.0, 11.5, 0x79C0FF)
+
+        text("ERRORES:", px0 + 18.0, py0 + 112.0, 10.0, 0x8B949E)
+        text_num(s_errors, px0 + 125.0, py0 + 111.0, 11.5, 0xF85149)
+
+        text("-15 pts/error y -1 pt/seg", px0 + 18.0, py0 + 136.0, 9.0, 0x8B949E)
+
+        by = py0 + 158.0
+        bw_btn = (pw - 36.0) * 0.5
+        bx_next = px0 + 12.0
+        bx_cls = px0 + 24.0 + bw_btn
+
+        draw_btn(bx_next, by, bw_btn, 36.0, 0x238636, 0x2EA043, "SIGUIENTE", bx_next + 12.0, by + 12.0, 0xFFFFFF)
+        draw_btn(bx_cls, by, bw_btn, 36.0, 0x21262D, 0x30363D, "CERRAR", bx_cls + 18.0, by + 12.0, 0xE6EDF3)
+
+        if (clicked == 1.0) {
+            if (hit_rect(px, py, bx_next, by, bw_btn, 36.0) == 1.0) {
+                act = 1.0
+            } else {
+                if (hit_rect(px, py, bx_cls, by, bw_btn, 36.0) == 1.0) {
+                    act = 2.0
+                } else { 0.0 }
+            }
+        } else { 0.0 }
+    } else { 0.0 }
+    act
+}
+
 render_mini_sudoku(sw, sh, px, py, clicked) = {
     earned = 0.0
     if (s_init == 0.0) {
@@ -281,7 +355,6 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
     s_gy = 108.0
     s_cell = s_bw / 6.0
 
-    // Temporizador discreto (100% estable, sin % ni divisiones)
     if (s_won == 0.0) {
         s_tick = s_tick + 1.0
         if (s_tick >= 60.0) {
@@ -291,7 +364,6 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
     } else { 0.0 }
     s_sel_val = mem_get(0.0, s_sel)
 
-    // Barra de navegación de tableros: [<] #N [>] [+5] y TIEMPO
     ny = 56.0
     draw_btn(s_gx, ny, 32.0, 26.0, 0x21262D, 0x30363D, "<", s_gx + 11.0, ny + 7.0, 0xE6EDF3)
     text("SUDOKU #", s_gx + 38.0, ny + 7.0, 11.5, 0x3FB950)
@@ -303,10 +375,12 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
     text_num(s_secs, s_gx + s_bw - 38.0, ny + 6.0, 11.0, 0x79C0FF)
 
     if (s_msg == 1.0) {
-        text("PERFECTO! PULSA > PARA SIGUIENTE", s_gx, 88.0, 9.5, 0x3FB950)
+        text("GANASTE! SCORE:", s_gx, 88.0, 9.5, 0x3FB950)
+        text_num(s_last_score, s_gx + 124.0, 87.0, 10.5, 0xD29922)
     } else {
         if (s_msg == 2.0) {
-            text("REVISA: FALTAN O SE REPITEN NUMEROS", s_gx, 88.0, 9.5, 0xF85149)
+            text("REVISA TABLERO — ERR:", s_gx, 88.0, 9.5, 0xF85149)
+            text_num(s_errors, s_gx + 162.0, 87.0, 10.5, 0xF85149)
         } else {
             if (difficulty == 1.0) {
                 text("Dificultad: FACIL — Conflictos en rojo", s_gx, 88.0, 9.5, 0x8B949E)
@@ -331,41 +405,56 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
     draw_btn(s_gx, ay, aw, 40.0, 0x238636, 0x2EA043, "VALIDAR", s_gx + 14.0, ay + 14.0, 0xFFFFFF)
     draw_btn(s_gx + aw + 10.0, ay, aw, 40.0, 0x21262D, 0x30363D, "REINICIAR", s_gx + aw + 24.0, ay + 14.0, 0xE6EDF3)
 
-    if (clicked == 1.0) {
-        if (hit_rect(px, py, s_gx, ny, 32.0, 26.0) == 1.0) {
-            if (s_level > 1.0) {
-                s_level = s_level - 1.0
-                sudoku_load_level(s_level, difficulty)
-            } else { 0.0 }
+    if (s_popup == 1.0) {
+        pop_act = sudoku_render_win_popup(sw, sh, px, py, clicked)
+        if (pop_act == 1.0) {
+            s_level = s_level + 1.0
+            sudoku_load_level(s_level, difficulty)
         } else {
-            if (hit_rect(px, py, s_gx + 132.0, ny, 32.0, 26.0) == 1.0) {
-                s_level = s_level + 1.0
-                sudoku_load_level(s_level, difficulty)
+            if (pop_act == 2.0) {
+                s_popup = 0.0
+            } else { 0.0 }
+        }
+    } else {
+        if (clicked == 1.0) {
+            if (hit_rect(px, py, s_gx, ny, 32.0, 26.0) == 1.0) {
+                if (s_level > 1.0) {
+                    s_level = s_level - 1.0
+                    sudoku_load_level(s_level, difficulty)
+                } else { 0.0 }
             } else {
-                if (hit_rect(px, py, s_gx + 168.0, ny, 38.0, 26.0) == 1.0) {
-                    s_level = s_level + 5.0
+                if (hit_rect(px, py, s_gx + 132.0, ny, 32.0, 26.0) == 1.0) {
+                    s_level = s_level + 1.0
                     sudoku_load_level(s_level, difficulty)
                 } else {
-                    hit_i = grid_hit_index(px, py, s_gx, s_gy, 6.0, 6.0, s_cell)
-                    if (hit_i >= 0.0) {
-                        s_sel = hit_i
+                    if (hit_rect(px, py, s_gx + 168.0, ny, 38.0, 26.0) == 1.0) {
+                        s_level = s_level + 5.0
+                        sudoku_load_level(s_level, difficulty)
                     } else {
-                        if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
-                            if (sudoku_validate_all() == 1.0) {
-                                if (s_won == 0.0) {
-                                    s_won = 1.0
-                                    earned = 50.0
-                                } else { 0.0 }
-                            } else { 0.0 }
+                        hit_i = grid_hit_index(px, py, s_gx, s_gy, 6.0, 6.0, s_cell)
+                        if (hit_i >= 0.0) {
+                            s_sel = hit_i
                         } else {
-                            if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
-                                sudoku_reset_board()
-                            } else { 0.0 }
+                            if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
+                                if (sudoku_validate_all() == 1.0) {
+                                    if (s_won == 0.0) {
+                                        s_won = 1.0
+                                        s_popup = 1.0
+                                        pts_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
+                                        s_last_score = pts_calc
+                                        earned = pts_calc
+                                    } else { 0.0 }
+                                } else { 0.0 }
+                            } else {
+                                if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
+                                    sudoku_reset_board()
+                                } else { 0.0 }
+                            }
                         }
                     }
                 }
             }
-        }
-    } else { 0.0 }
+        } else { 0.0 }
+    }
     earned
 }
