@@ -289,7 +289,7 @@ sudoku_draw_keypad(px, py, clicked) = {
     1.0
 }
 
-// Dibuja el popup solo cuando s_popup == 1.0 (activado al pulsar VALIDAR)
+// Dibuja el popup: muestra "GANASTE!" y el score calculado al resolver, o el estado de validación
 sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act = 0.0
     if (s_popup == 1.0) {
@@ -308,7 +308,7 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
         if (s_won == 1.0) {
             text("GANASTE! SUDOKU RESUELTO", px0 + 14.0, py0 + 16.0, 12.0, 0x3FB950)
         } else {
-            text("RESULTADO DE VALIDACION", px0 + 14.0, py0 + 16.0, 12.0, 0xD29922)
+            text("AUN NO — REVISA TABLERO", px0 + 14.0, py0 + 16.0, 12.0, 0xF85149)
         }
 
         text("SCORE:", px0 + 16.0, py0 + 50.0, 11.0, 0x8B949E)
@@ -343,7 +343,7 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act
 }
 
-// Se dispara únicamente al tocar VALIDAR
+// Calcula el score por tiempo y descuento de errores y lo devuelve para sumar en PTS/R
 sudoku_on_validate() = {
     res_pts = 0.0
     s_popup = 1.0
@@ -352,9 +352,11 @@ sudoku_on_validate() = {
             s_won = 1.0
             s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
             res_pts = s_last_score
-        } else { 0.0 }
+        } else {
+            s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
+        }
     } else {
-        s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
+        s_last_score = 0.0
     }
     res_pts
 }
