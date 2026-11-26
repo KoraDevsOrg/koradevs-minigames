@@ -9,6 +9,7 @@ signal s_sel = 0.0
 signal s_sel_val = 0.0
 signal s_msg = 0.0
 signal s_won = 0.0
+signal s_val_count = 0.0
 signal s_popup = 0.0
 signal s_errors = 0.0
 signal s_last_score = 0.0
@@ -342,10 +343,12 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
     if (s_init == 0.0) {
         s_init = 1.0
         s_last_diff = difficulty
+        s_val_count = 0.0
         sudoku_load_level(s_level, difficulty)
     } else {
         if (s_last_diff != difficulty) {
             s_last_diff = difficulty
+            s_val_count = 0.0
             sudoku_load_level(s_level, difficulty)
         } else { 0.0 }
     }
@@ -379,16 +382,20 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
         text_num(s_last_score, s_gx + 124.0, 87.0, 10.5, 0xD29922)
     } else {
         if (s_msg == 2.0) {
-            text("REVISA TABLERO — ERR:", s_gx, 88.0, 9.5, 0xF85149)
-            text_num(s_errors, s_gx + 162.0, 87.0, 10.5, 0xF85149)
+            text("REVISA — ERR:", s_gx, 88.0, 9.5, 0xF85149)
+            text_num(s_errors, s_gx + 112.0, 87.0, 10.5, 0xF85149)
+            text("CHK:", s_gx + 146.0, 88.0, 9.5, 0x8B949E)
+            text_num(s_val_count, s_gx + 182.0, 87.0, 10.5, 0x79C0FF)
         } else {
+            text("CHK:", s_gx, 88.0, 9.5, 0x8B949E)
+            text_num(s_val_count, s_gx + 36.0, 87.0, 10.5, 0x79C0FF)
             if (difficulty == 1.0) {
-                text("Dificultad: FACIL — Conflictos en rojo", s_gx, 88.0, 9.5, 0x8B949E)
+                text("FACIL — Conflictos en rojo", s_gx + 64.0, 88.0, 9.5, 0x8B949E)
             } else {
                 if (difficulty == 2.0) {
-                    text("Dificultad: MEDIA — Conflictos en rojo", s_gx, 88.0, 9.5, 0xD29922)
+                    text("MEDIA — Conflictos en rojo", s_gx + 64.0, 88.0, 9.5, 0xD29922)
                 } else {
-                    text("Dificultad: DIFICIL — Conflictos en rojo", s_gx, 88.0, 9.5, 0xF85149)
+                    text("DIFICIL — Conflictos en rojo", s_gx + 64.0, 88.0, 9.5, 0xF85149)
                 }
             }
         }
@@ -418,6 +425,7 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
 
             if (hit_rect(px, py, bx_next, by, bw_btn, 40.0) == 1.0) {
                 s_level = s_level + 1.0
+                s_val_count = 0.0
                 sudoku_load_level(s_level, difficulty)
             } else {
                 if (hit_rect(px, py, bx_cls, by, bw_btn, 40.0) == 1.0) {
@@ -426,6 +434,7 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
             }
         } else {
             if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
+                s_val_count = s_val_count + 1.0
                 if (sudoku_validate_all() == 1.0) {
                     if (s_won == 0.0) {
                         s_won = 1.0
@@ -439,20 +448,24 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
                 } else { 0.0 }
             } else {
                 if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
+                    s_val_count = 0.0
                     sudoku_reset_board()
                 } else {
                     if (hit_rect(px, py, s_gx, ny, 32.0, 26.0) == 1.0) {
                         if (s_level > 1.0) {
                             s_level = s_level - 1.0
+                            s_val_count = 0.0
                             sudoku_load_level(s_level, difficulty)
                         } else { 0.0 }
                     } else {
                         if (hit_rect(px, py, s_gx + 132.0, ny, 32.0, 26.0) == 1.0) {
                             s_level = s_level + 1.0
+                            s_val_count = 0.0
                             sudoku_load_level(s_level, difficulty)
                         } else {
                             if (hit_rect(px, py, s_gx + 168.0, ny, 38.0, 26.0) == 1.0) {
                                 s_level = s_level + 5.0
+                                s_val_count = 0.0
                                 sudoku_load_level(s_level, difficulty)
                             } else {
                                 hit_i = grid_hit_index(px, py, s_gx, s_gy, 6.0, 6.0, s_cell)
