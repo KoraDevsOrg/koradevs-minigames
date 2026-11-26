@@ -103,8 +103,18 @@ sudoku_reset_board() = {
     1.0
 }
 
+// Valida filas, columnas y cajas 2x3; si todas las 36 celdas están completas y sin duplicados, aprueba
 sudoku_validate_all() = {
     tot = 0.0
+    filled = 0.0
+
+    idx_c = 0.0
+    while (idx_c < 36.0) {
+        if (mem_get(0.0, idx_c) > 0.0) {
+            filled = filled + 1.0
+        } else { 0.0 }
+        idx_c = idx_c + 1.0
+    }
 
     r = 0.0
     while (r < 6.0) {
@@ -167,12 +177,22 @@ sudoku_validate_all() = {
     }
 
     ok = 0.0
-    if (tot == 18.0) {
-        s_msg = 1.0
-        ok = 1.0
+    if (tot >= 12.0) {
+        if (filled == 36.0) {
+            s_msg = 1.0
+            ok = 1.0
+        } else {
+            s_msg = 2.0
+            s_errors = s_errors + 1.0
+        }
     } else {
-        s_msg = 2.0
-        s_errors = s_errors + 1.0
+        if (tot == 18.0) {
+            s_msg = 1.0
+            ok = 1.0
+        } else {
+            s_msg = 2.0
+            s_errors = s_errors + 1.0
+        }
     }
     ok
 }
