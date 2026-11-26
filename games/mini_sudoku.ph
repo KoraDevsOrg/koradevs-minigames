@@ -10,6 +10,7 @@ signal s_sel_val = 0.0
 signal s_msg = 0.0
 signal s_won = 0.0
 signal s_val_count = 0.0
+signal s_valid_groups = 0.0
 signal s_popup = 0.0
 signal s_errors = 0.0
 signal s_last_score = 0.0
@@ -103,17 +104,29 @@ sudoku_reset_board() = {
     1.0
 }
 
-// Valida filas, columnas y cajas 2x3; si todas las 36 celdas están completas y sin duplicados, aprueba
+// Valida los 6 dígitos completos (borde verde) y las 18 regiones (6 filas + 6 cols + 6 cajas 2x3)
+// Todas las variables locales se declaran arriba para evitar colisiones de tempPtr en bucles while
 sudoku_validate_all() = {
     tot = 0.0
-    filled = 0.0
+    all_green = 1.0
+    k = 1.0
+    r = 0.0
+    c = 0.0
+    br = 0.0
+    bc = 0.0
+    lr = 0.0
+    lc = 0.0
+    sm = 0.0
+    pr = 1.0
+    v = 0.0
+    idx = 0.0
+    ok = 0.0
 
-    idx_c = 0.0
-    while (idx_c < 36.0) {
-        if (mem_get(0.0, idx_c) > 0.0) {
-            filled = filled + 1.0
+    while (k <= 6.0) {
+        if (mem_count(0.0, 36.0, k) != 6.0) {
+            all_green = 0.0
         } else { 0.0 }
-        idx_c = idx_c + 1.0
+        k = k + 1.0
     }
 
     r = 0.0
@@ -176,16 +189,8 @@ sudoku_validate_all() = {
         br = br + 1.0
     }
 
-    ok = 0.0
-    if (tot >= 12.0) {
-        if (filled == 36.0) {
-            s_msg = 1.0
-            ok = 1.0
-        } else {
-            s_msg = 2.0
-            s_errors = s_errors + 1.0
-        }
-    } else {
+    s_valid_groups = tot
+    if (all_green == 1.0) {
         if (tot == 18.0) {
             s_msg = 1.0
             ok = 1.0
@@ -193,6 +198,9 @@ sudoku_validate_all() = {
             s_msg = 2.0
             s_errors = s_errors + 1.0
         }
+    } else {
+        s_msg = 2.0
+        s_errors = s_errors + 1.0
     }
     ok
 }
@@ -309,15 +317,15 @@ sudoku_draw_keypad(px, py, clicked) = {
     1.0
 }
 
-// Dibuja el popup: muestra "GANASTE!" y el score calculado al resolver, o el estado de validación
+// Dibuja el popup con el score actual (ganado o parcial), grupos válidos (X/18), tiempo y errores
 sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act = 0.0
     if (s_popup == 1.0) {
         pw = s_bw - 20.0
         if (pw < 200.0) { pw = 200.0 } else { 0.0 }
-        ph = 228.0
+        ph = 236.0
         px0 = s_gx + 10.0
-        py0 = s_gy + 44.0
+        py0 = s_gy + 40.0
 
         rect(px0, py0, pw, ph, 0x161B22)
         line(px0, py0, px0 + pw, py0, 0x3FB950)
@@ -331,18 +339,22 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
             text("AUN NO — REVISA TABLERO", px0 + 14.0, py0 + 16.0, 12.0, 0xF85149)
         }
 
-        text("SCORE:", px0 + 16.0, py0 + 50.0, 11.0, 0x8B949E)
-        text_num(s_last_score, px0 + 92.0, py0 + 49.0, 14.0, 0xD29922)
+        text("SCORE:", px0 + 16.0, py0 + 48.0, 11.0, 0x8B949E)
+        text_num(s_last_score, px0 + 92.0, py0 + 47.0, 14.0, 0xD29922)
 
-        text("TIEMPO (s):", px0 + 16.0, py0 + 84.0, 10.0, 0x8B949E)
-        text_num(s_secs, px0 + 124.0, py0 + 83.0, 11.5, 0x79C0FF)
+        text("GRUPOS OK:", px0 + 16.0, py0 + 78.0, 10.0, 0x8B949E)
+        text_num(s_valid_groups, px0 + 124.0, py0 + 77.0, 11.5, 0x3FB950)
+        text("/ 18", px0 + 150.0, py0 + 78.0, 10.0, 0x8B949E)
 
-        text("ERRORES:", px0 + 16.0, py0 + 110.0, 10.0, 0x8B949E)
-        text_num(s_errors, px0 + 124.0, py0 + 109.0, 11.5, 0xF85149)
+        text("TIEMPO (s):", px0 + 16.0, py0 + 104.0, 10.0, 0x8B949E)
+        text_num(s_secs, px0 + 124.0, py0 + 103.0, 11.5, 0x79C0FF)
 
-        text("-1 pt/seg y -15 pts/error", px0 + 16.0, py0 + 138.0, 9.5, 0x8B949E)
+        text("ERRORES:", px0 + 16.0, py0 + 130.0, 10.0, 0x8B949E)
+        text_num(s_errors, px0 + 124.0, py0 + 129.0, 11.5, 0xF85149)
 
-        by = py0 + 170.0
+        text("-1 pt/seg y -15 pts/error", px0 + 16.0, py0 + 154.0, 9.0, 0x8B949E)
+
+        by = py0 + 178.0
         bw_btn = (pw - 36.0) * 0.5
         bx_next = px0 + 12.0
         bx_cls = px0 + 24.0 + bw_btn
@@ -363,20 +375,23 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act
 }
 
-// Calcula el score por tiempo y descuento de errores y lo devuelve para sumar en PTS/R
+// Calcula el score al validar (completo si gana, parcial según grupos válidos si faltan/hay errores)
 sudoku_on_validate() = {
     res_pts = 0.0
+    base_calc = 0.0
+    parcial = 0.0
     s_popup = 1.0
     if (sudoku_validate_all() == 1.0) {
+        base_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
+        s_last_score = base_calc
         if (s_won == 0.0) {
             s_won = 1.0
-            s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
-            res_pts = s_last_score
-        } else {
-            s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
-        }
+            res_pts = base_calc
+        } else { 0.0 }
     } else {
-        s_last_score = 0.0
+        base_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
+        parcial = (base_calc * s_valid_groups) / 18.0
+        s_last_score = parcial - (parcial % 1.0)
     }
     res_pts
 }
