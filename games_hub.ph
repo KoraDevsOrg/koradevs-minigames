@@ -1,3 +1,6 @@
+import "@store/ui/base.ph" -reutilizar
+
+// 0 = Menú Principal | 1 = Mini Sudoku | 2 = Tango | 3 = Queens
 signal active_game = 0.0
 signal difficulty = 1.0
 signal score = 0.0
@@ -6,23 +9,9 @@ signal last_click = 0.0
 signal game_tick = 0.0
 signal best_score = 0.0
 
-in_box(px, py, rx, ry, rw, rh) = {
-    hit = 0.0
-    if (px >= rx) {
-        if (px <= (rx + rw)) {
-            if (py >= ry) {
-                if (py <= (ry + rh)) {
-                    hit = 1.0
-                } else { 0.0 }
-            } else { 0.0 }
-        } else { 0.0 }
-    } else { 0.0 }
-    hit
-}
-
 select_game(target_id, px, py, rx, ry, rw, rh) = {
     res = 0.0
-    if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
+    if (hit_rect(px, py, rx, ry, rw, rh) == 1.0) {
         active_game = target_id
         streak = 0.0
         res = 1.0
@@ -32,7 +21,7 @@ select_game(target_id, px, py, rx, ry, rw, rh) = {
 
 cycle_difficulty(px, py, rx, ry, rw, rh) = {
     res = 0.0
-    if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
+    if (hit_rect(px, py, rx, ry, rw, rh) == 1.0) {
         if (difficulty >= 3.0) {
             difficulty = 1.0
         } else {
@@ -45,7 +34,7 @@ cycle_difficulty(px, py, rx, ry, rw, rh) = {
 
 add_points(base_pts, px, py, rx, ry, rw, rh) = {
     res = 0.0
-    if (in_box(px, py, rx, ry, rw, rh) == 1.0) {
+    if (hit_rect(px, py, rx, ry, rw, rh) == 1.0) {
         streak = streak + 1.0
         score = score + (base_pts * difficulty)
         if (score > best_score) {
@@ -61,11 +50,8 @@ render_top_hud(sw, px, py, clicked) = {
     rect(0.0, 0.0, sw, 44.0, 0x161B22)
     line(0.0, 44.0, sw, 44.0, 0x30363D)
 
-    rect(8.0, 8.0, 68.0, 28.0, 0x21262D)
-    text("MENU", 18.0, 26.0, 10.0, 0x58A6FF)
-
-    rect(84.0, 8.0, 74.0, 28.0, 0x1F2937)
-    text("NIVEL", 92.0, 26.0, 9.5, 0xD29922)
+    draw_btn(8.0, 8.0, 68.0, 28.0, 0x21262D, 0x30363D, "MENU", 18.0, 26.0, 0x58A6FF)
+    draw_btn(84.0, 8.0, 74.0, 28.0, 0x1F2937, 0x30363D, "NIVEL", 92.0, 26.0, 0xD29922)
     text(difficulty, 138.0, 26.0, 10.0, 0xFFFFFF)
 
     text("PTS:", sw - 120.0, 26.0, 9.5, 0x8B949E)
@@ -93,17 +79,9 @@ render_main_menu(sw, sh, px, py, clicked) = {
     text("RECORD:", 12.0, 92.0, 9.5, 0x8B949E)
     text(best_score, 74.0, 92.0, 10.0, 0xD29922)
 
-    rect(12.0, 108.0, w, 52.0, 0x161B22)
-    rect(12.0, 108.0, 4.0, 52.0, 0x3FB950)
-    text("1. MINI SUDOKU", 24.0, 138.0, 11.0, 0xFFFFFF)
-
-    rect(12.0, 170.0, w, 52.0, 0x161B22)
-    rect(12.0, 170.0, 4.0, 52.0, 0x58A6FF)
-    text("2. TANGO", 24.0, 200.0, 11.0, 0xFFFFFF)
-
-    rect(12.0, 232.0, w, 52.0, 0x161B22)
-    rect(12.0, 232.0, 4.0, 52.0, 0xD29922)
-    text("3. QUEENS", 24.0, 262.0, 11.0, 0xFFFFFF)
+    draw_btn(12.0, 108.0, w, 52.0, 0x161B22, 0x3FB950, "1. MINI SUDOKU", 24.0, 138.0, 0xFFFFFF)
+    draw_btn(12.0, 170.0, w, 52.0, 0x161B22, 0x58A6FF, "2. TANGO", 24.0, 200.0, 0xFFFFFF)
+    draw_btn(12.0, 232.0, w, 52.0, 0x161B22, 0xD29922, "3. QUEENS", 24.0, 262.0, 0xFFFFFF)
 
     if (clicked == 1.0) {
         if (select_game(1.0, px, py, 12.0, 108.0, w, 52.0) == 1.0) {
@@ -136,8 +114,7 @@ render_active_game_stub(title_lbl, accent_col, sw, sh, px, py, clicked) = {
     line(gx, gy + (cell * 3.0), gx + (cell * 4.0), gy + (cell * 3.0), 0x30363D)
 
     btn_y = gy + (cell * 4.0) + 18.0
-    rect(14.0, btn_y, 176.0, 38.0, 0x238636)
-    text("VALIDAR JUGADA (+10)", 24.0, btn_y + 23.0, 10.0, 0xFFFFFF)
+    draw_btn(14.0, btn_y, 176.0, 38.0, 0x238636, 0x2EA043, "VALIDAR JUGADA (+10)", 24.0, btn_y + 23.0, 0xFFFFFF)
     if (clicked == 1.0) {
         add_points(10.0, px, py, 14.0, btn_y, 176.0, 38.0)
     } else { 0.0 }
