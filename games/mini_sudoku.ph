@@ -338,6 +338,21 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act
 }
 
+sudoku_on_validate() = {
+    res_pts = 0.0
+    if (sudoku_validate_all() == 1.0) {
+        if (s_won == 0.0) {
+            s_won = 1.0
+            s_popup = 1.0
+            s_last_score = sudoku_calc_score(difficulty, s_secs, s_errors)
+            res_pts = s_last_score
+        } else {
+            s_popup = 1.0
+        }
+    } else { 0.0 }
+    res_pts
+}
+
 render_mini_sudoku(sw, sh, px, py, clicked) = {
     earned = 0.0
     if (s_init == 0.0) {
@@ -435,17 +450,7 @@ render_mini_sudoku(sw, sh, px, py, clicked) = {
         } else {
             if (hit_rect(px, py, s_gx, ay, aw, 40.0) == 1.0) {
                 s_val_count = s_val_count + 1.0
-                if (sudoku_validate_all() == 1.0) {
-                    if (s_won == 0.0) {
-                        s_won = 1.0
-                        s_popup = 1.0
-                        pts_calc = sudoku_calc_score(difficulty, s_secs, s_errors)
-                        s_last_score = pts_calc
-                        earned = pts_calc
-                    } else {
-                        s_popup = 1.0
-                    }
-                } else { 0.0 }
+                earned = sudoku_on_validate()
             } else {
                 if (hit_rect(px, py, s_gx + aw + 10.0, ay, aw, 40.0) == 1.0) {
                     s_val_count = 0.0
