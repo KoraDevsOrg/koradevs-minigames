@@ -292,10 +292,10 @@ sudoku_draw_keypad(px, py, clicked) = {
 sudoku_render_win_popup(sw, sh, px, py, clicked) = {
     act = 0.0
     if (s_popup == 1.0) {
-        pw = s_bw - 24.0
-        ph = 210.0
-        px0 = s_gx + 12.0
-        py0 = s_gy + 58.0
+        pw = s_bw - 20.0
+        ph = 224.0
+        px0 = s_gx + 10.0
+        py0 = s_gy + 52.0
 
         rect(px0, py0, pw, ph, 0x161B22)
         line(px0, py0, px0 + pw, py0, 0x3FB950)
@@ -303,32 +303,32 @@ sudoku_render_win_popup(sw, sh, px, py, clicked) = {
         line(px0, py0, px0, py0 + ph, 0x3FB950)
         line(px0 + pw, py0, px0 + pw, py0 + ph, 0x3FB950)
 
-        text("GANASTE! SUDOKU RESUELTO", px0 + 16.0, py0 + 18.0, 12.5, 0x3FB950)
+        text("GANASTE! SUDOKU RESUELTO", px0 + 14.0, py0 + 16.0, 12.0, 0x3FB950)
 
-        text("SCORE:", px0 + 18.0, py0 + 54.0, 11.0, 0x8B949E)
-        text_num(s_last_score, px0 + 95.0, py0 + 53.0, 14.0, 0xD29922)
+        text("SCORE:", px0 + 16.0, py0 + 50.0, 11.0, 0x8B949E)
+        text_num(s_last_score, px0 + 92.0, py0 + 49.0, 14.0, 0xD29922)
 
-        text("TIEMPO (s):", px0 + 18.0, py0 + 86.0, 10.0, 0x8B949E)
-        text_num(s_secs, px0 + 125.0, py0 + 85.0, 11.5, 0x79C0FF)
+        text("TIEMPO (s):", px0 + 16.0, py0 + 84.0, 10.0, 0x8B949E)
+        text_num(s_secs, px0 + 124.0, py0 + 83.0, 11.5, 0x79C0FF)
 
-        text("ERRORES:", px0 + 18.0, py0 + 112.0, 10.0, 0x8B949E)
-        text_num(s_errors, px0 + 125.0, py0 + 111.0, 11.5, 0xF85149)
+        text("ERRORES:", px0 + 16.0, py0 + 110.0, 10.0, 0x8B949E)
+        text_num(s_errors, px0 + 124.0, py0 + 109.0, 11.5, 0xF85149)
 
-        text("-15 pts/error y -1 pt/seg", px0 + 18.0, py0 + 136.0, 9.0, 0x8B949E)
+        text("-1 pt/seg y -15 pts/error", px0 + 16.0, py0 + 138.0, 9.5, 0x8B949E)
 
-        by = py0 + 158.0
+        by = py0 + 168.0
         bw_btn = (pw - 36.0) * 0.5
         bx_next = px0 + 12.0
         bx_cls = px0 + 24.0 + bw_btn
 
-        draw_btn(bx_next, by, bw_btn, 36.0, 0x238636, 0x2EA043, "SIGUIENTE", bx_next + 12.0, by + 12.0, 0xFFFFFF)
-        draw_btn(bx_cls, by, bw_btn, 36.0, 0x21262D, 0x30363D, "CERRAR", bx_cls + 18.0, by + 12.0, 0xE6EDF3)
+        draw_btn(bx_next, by, bw_btn, 38.0, 0x238636, 0x2EA043, "SIGUIENTE", bx_next + 10.0, by + 13.0, 0xFFFFFF)
+        draw_btn(bx_cls, by, bw_btn, 38.0, 0x21262D, 0x30363D, "CERRAR", bx_cls + 18.0, by + 13.0, 0xE6EDF3)
 
         if (clicked == 1.0) {
-            if (hit_rect(px, py, bx_next, by, bw_btn, 36.0) == 1.0) {
+            if (hit_rect(px, py, bx_next, by, bw_btn, 38.0) == 1.0) {
                 act = 1.0
             } else {
-                if (hit_rect(px, py, bx_cls, by, bw_btn, 36.0) == 1.0) {
+                if (hit_rect(px, py, bx_cls, by, bw_btn, 38.0) == 1.0) {
                     act = 2.0
                 } else { 0.0 }
             }
